@@ -42,15 +42,13 @@ class WordGuesserApp < Sinatra::Base
     params[:guess].to_s[0]
     ### YOUR CODE HERE ###
     letter = params[:guess].to_s[0]
-    #actually guess the letter, but if the guess returns false --> raise error
-    if !@game.guess(letter)
-      #game.guess return false if repeated guess or invalid so deduve whihc error to raise
-      if letter.nil? || letter.empty? || letter.match?(/[^a-zA-Z]/)
-        flash[:message] = "Invalid guess."
-      else
-        flash[:message] = "You have already used that letter."
-      end
-    end
+    #if invalid just raise error
+    if letter.nil? || letter.empty? || letter.match?(/[^a-zA-Z]/)
+      flash[:message] = "Invalid guess."
+    #if valid actually guess the letter, but if the guess returns false --> raise error
+    elsif !@game.guess(letter)
+      flash[:message] = "You have already used that letter."
+    end  
   
     redirect '/show'
   end
@@ -74,11 +72,21 @@ class WordGuesserApp < Sinatra::Base
 
   get '/win' do
     ### YOUR CODE HERE ###
-    erb :win # You may change/remove this line
+    #catch cheating case if no game exists or game is not in win state dont let it see win page
+    if !@game || @game.check_win_or_lose != :win
+      redirect '/show'
+    else
+      erb :win # You may change/remove this line
+    end
   end
 
   get '/lose' do
     ### YOUR CODE HERE ###
-    erb :lose # You may change/remove this line
+    #catch cheating case if no game exists or game is not in win state dont let it see win page
+    if !@game || @game.check_win_or_lose != :lose
+      redirect '/show'
+    else
+      erb :lose # You may change/remove this line
+    end
   end
 end
